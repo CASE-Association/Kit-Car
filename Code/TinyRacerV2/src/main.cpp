@@ -27,12 +27,10 @@ char pass[] = "CaseLocalNet";
 BlynkTimer timer;
 int throttle = 0;
 int steering = 0;
-int motor1 = 18;
-int motor2 = 26;
-int motor1rev = 23;
-int motor2rev = 25;
+int motor1 = 17;
+int motor1rev = 16;
 int adc_max = 4095;
-int trim = 0;
+//int trim = 0;
 
 Servo steering_servo;
 
@@ -49,7 +47,6 @@ BLYNK_WRITE(V4)
  throttle = param.asInt();
 }
 
-
 void setup()
 {
   // Debug console
@@ -65,20 +62,16 @@ void setup()
 
   Blynk.begin(BLYNK_AUTH_TOKEN, ssid, pass);
   pinMode(motor1, OUTPUT);
-  pinMode(motor2, OUTPUT);
   pinMode(motor1rev, OUTPUT);
-  pinMode(motor2rev, OUTPUT);
   pinMode(14, OUTPUT);
   //steering_servo.attach(13);
 
 
-  digitalWrite(14, HIGH); //power to motor driver
+  digitalWrite(14, LOW); //Set motor driver standby pin to low
 
-  // Stop the motor
+  // Set motor direction pins to low
   digitalWrite(motor1, LOW);
-  digitalWrite(motor2, LOW);
   digitalWrite(motor1rev, LOW);
-  digitalWrite(motor2rev, LOW);
 }
 
 void loop()
@@ -88,25 +81,22 @@ void loop()
   steering_servo.write(steering);
   //Adjust throttle if input is greater than 4
   if (throttle > 4){
-    trim = round(throttle * 1.2);
-    analogWrite(motor1, trim);
-    analogWrite(motor2rev, throttle);
-    digitalWrite(motor2, LOW);
+    //trim = round(throttle * 1.2);
+    digitalWrite(14, HIGH);
+    analogWrite(motor1, throttle);
     digitalWrite(motor1rev, LOW);
   }
   //Reverse throttle if input is less than -4
   else if (throttle < -4){
+    digitalWrite(14, HIGH);
     digitalWrite(motor1, LOW);
-    analogWrite(motor2, abs(throttle));
     analogWrite(motor1rev, abs(throttle));
-    digitalWrite(motor2rev, LOW);
   }
-  //Zero throttle if input is less than 4 and greater than -4
+  //Zero throttle if input is less than 4 and greater than -4 and set the motor driver standby pin to low
   else if (throttle < 4 && throttle > -4){
     digitalWrite(motor1, LOW);
-    digitalWrite(motor2, LOW);
     digitalWrite(motor1rev, LOW);
-    digitalWrite(motor2rev, LOW);
+    digitalWrite(14, LOW);
   }
   
   //Adjust steering if input is greater than 4
